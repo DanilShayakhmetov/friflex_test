@@ -53,6 +53,5 @@ class OrderForm extends Model
 
         return $order;
     }
-
 }
 
