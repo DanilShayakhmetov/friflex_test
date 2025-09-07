@@ -3,7 +3,11 @@
 namespace app\controllers;
 
 use app\models\Order;
+use app\models\OrderForm;
 use app\models\OrderSearch;
+use app\models\Product;
+use Yii;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -60,25 +64,42 @@ class OrderController extends Controller
         ]);
     }
 
-    /**
-     * Creates a new Order model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
-     */
+//    /**
+//     * Creates a new Order model.
+//     * If creation is successful, the browser will be redirected to the 'view' page.
+//     * @return string|\yii\web\Response
+//     */
+//    public function actionCreate()
+//    {
+//        $model = new Order();
+//
+//        if ($this->request->isPost) {
+//            if ($model->load($this->request->post()) && $model->save()) {
+//                return $this->redirect(['view', 'id' => $model->id]);
+//            }
+//        } else {
+//            $model->loadDefaultValues();
+//        }
+//
+//        return $this->render('create', [
+//            'model' => $model,
+//        ]);
+//    }
+
     public function actionCreate()
     {
-        $model = new Order();
-
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
-        } else {
-            $model->loadDefaultValues();
+        $model = new OrderForm();
+        $products = Product::find()->all(); // Получаем все товары для select
+        $productPrices = ArrayHelper::map($products, 'id', 'price');
+        if ($model->load(Yii::$app->request->post()) && $order = $model->save()) {
+            Yii::$app->session->setFlash('success', 'Заказ создан');
+            return $this->redirect(['view', 'id' => $order->id]);
         }
 
         return $this->render('create', [
             'model' => $model,
+            'products' => $products, // Передаём в view
+            'productPrices' => $productPrices, // Передаём в view
         ]);
     }
 
