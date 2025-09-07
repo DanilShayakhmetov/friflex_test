@@ -1,23 +1,11 @@
 <?php
-/**
- * @link https://www.yiiframework.com/
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license https://www.yiiframework.com/license/
- */
 
 namespace app\commands;
 
 use Yii;
 use yii\console\Controller;
+use app\models\User;
 
-/**
- * This command echoes the first argument that you have entered.
- *
- * This command is provided as an example for you to learn how to create console commands.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
- */
 class RbacController extends Controller
 {
     public function actionInit()
@@ -25,7 +13,9 @@ class RbacController extends Controller
         $auth = Yii::$app->authManager;
         $auth->removeAll();
 
-        // Роли
+        echo "RBAC очищен...\n";
+
+        // 1) Создаем роли
         $admin = $auth->createRole('admin');
         $manager = $auth->createRole('manager');
         $customer = $auth->createRole('customer');
@@ -34,7 +24,9 @@ class RbacController extends Controller
         $auth->add($manager);
         $auth->add($customer);
 
-        // Права
+        echo "Роли созданы...\n";
+
+        // 2) Создаем права
         $editProduct = $auth->createPermission('editProduct');
         $editProduct->description = 'Редактировать товар';
         $auth->add($editProduct);
@@ -51,7 +43,9 @@ class RbacController extends Controller
         $createOrder->description = 'Создавать заказ';
         $auth->add($createOrder);
 
-        // Связываем роли и права
+        echo "Права созданы...\n";
+
+        // 3) Связываем роли и права
         $auth->addChild($admin, $editProduct);
         $auth->addChild($admin, $viewOrder);
         $auth->addChild($admin, $updateOrderStatus);
@@ -61,5 +55,33 @@ class RbacController extends Controller
         $auth->addChild($manager, $updateOrderStatus);
 
         $auth->addChild($customer, $createOrder);
+
+        echo "Роли и права связаны...\n";
+
+        // 4) Присваиваем роли существующим пользователям и генерируем токены
+        $users = User::find()->all();
+
+        foreach ($users as $user) {
+            // Если токена нет, генерируем
+            if (empty($user->token)) {
+                $user->token = Yii::$app->security->generateRandomString(64);
+                $user->save(false);
+                echo "Токен сгенерирован для пользователя {$user->username}: {$user->token}\n";
+            }
+
+            // Назначаем роль по username (можно менять логику по своему усмотрению)
+            if (strpos(strtolower($user->username), 'admin') !== false) {
+                $role = $admin;
+            } elseif (strpos(strtolower($user->username), 'manager') !== false) {
+                $role = $manager;
+            } else {
+                $role = $customer;
+            }
+
+            $auth->assign($role, $user->id);
+            echo "Роль '{$role->name}' назначена пользователю {$user->username}\n";
+        }
+
+        echo "RBAC и назначение ролей завершены!\n";
     }
 }

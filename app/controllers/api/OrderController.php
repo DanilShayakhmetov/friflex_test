@@ -2,6 +2,7 @@
 
 namespace app\controllers\api;
 
+use yii\filters\auth\HttpBearerAuth;
 use yii\rest\ActiveController;
 use app\models\Order;
 
@@ -15,7 +16,7 @@ class OrderController extends ActiveController
 
         // Включаем аутентификацию по токену (пример, можно JWT)
         $behaviors['authenticator'] = [
-            'class' => \yii\filters\auth\HttpBearerAuth::class,
+            'class' => HttpBearerAuth::class,
         ];
 
         return $behaviors;

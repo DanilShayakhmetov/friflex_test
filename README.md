@@ -75,3 +75,5 @@ AdminController → ProductController
 Только авторизованные пользователи.
 
 Только пользователи с ролью admin могут редактировать товары.
+
+php yii rbac/init
