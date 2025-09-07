@@ -44,7 +44,14 @@ class ProductController extends Controller
     public function actionSync()
     {
         $data = $this->parser->fetchData();
-        return $this->asJson(['count' => count($data), 'products' => $data]);
+        $this->parser->sync($data);
+        $searchModel = new ProductSearch();
+        $dataProvider = $searchModel->search($this->request->queryParams);
+
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 
     /**

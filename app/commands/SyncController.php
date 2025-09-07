@@ -9,7 +9,6 @@ namespace app\commands;
 
 use app\components\services\ParserInterface;
 use yii\console\Controller;
-use app\models\Product;
 
 class SyncController extends Controller
 {
@@ -26,19 +25,8 @@ class SyncController extends Controller
         $data = $this->parser->fetchData();
 
         if (!empty($data)) {
-            foreach ($data as $item) {
-                $product = Product::findOne(['id' => $item['id']]);
-                if (!$product) {
-                    $product = new Product();
-                    $product->id = $item['id'];
-                }
-                $product->name = $item['title'];
-                $product->price = $item['price'];
-                $product->description = $item['description'];
-                $product->save(false);
-            }
-
-            echo "Products synced!\n";
+            $result = $this->parser->sync($data);
+            echo "Products({$result}) synced!\n";
         } else {
 
             echo "Error - empty data!\n";
