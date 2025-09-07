@@ -69,6 +69,7 @@ $config = [
                     'pluralize' => false,
                 ],
 
+
                 // CRUD для OrderController
                 'order/<id:\d+>/view'   => 'order/view',
                 'order/<id:\d+>/update' => 'order/update',
