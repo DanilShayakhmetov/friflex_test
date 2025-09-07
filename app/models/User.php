@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\web\IdentityInterface;
 
 /**
  * This is the model class for table "user".
@@ -16,223 +17,71 @@ use Yii;
  *
  * @property Order[] $orders
  */
-class User extends \yii\db\ActiveRecord
+class User extends \yii\db\ActiveRecord implements IdentityInterface
 {
-
-    /**
-     * ENUM field values
-     */
     const ROLE_ADMIN = 'admin';
     const ROLE_MANAGER = 'manager';
     const ROLE_CUSTOMER = 'customer';
 
-    /**
-     * {@inheritdoc}
-     */
     public static function tableName()
     {
         return 'user';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function rules()
     {
         return [
-            [['token'], 'default', 'value' => null],
-            [['role'], 'default', 'value' => 'customer'],
             [['username', 'password'], 'required'],
-            [['role'], 'string'],
-            [['created_at'], 'safe'],
-            [['username', 'password', 'token'], 'string', 'max' => 255],
-            ['role', 'in', 'range' => array_keys(self::optsRole())],
+            [['username', 'password', 'token', 'role'], 'string', 'max' => 255],
+            [['role'], 'default', 'value' => self::ROLE_CUSTOMER],
             [['username'], 'unique'],
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
+    public static function findIdentity($id): ?IdentityInterface
     {
-        return [
-            'id' => Yii::t('app', 'ID'),
-            'username' => Yii::t('app', 'Username'),
-            'password' => Yii::t('app', 'Password'),
-            'token' => Yii::t('app', 'Token'),
-            'role' => Yii::t('app', 'Role'),
-            'created_at' => Yii::t('app', 'Created At'),
-        ];
+        return self::findOne($id);
     }
 
-    /**
-     * Gets query for [[Orders]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getOrders()
+    public static function findIdentityByAccessToken($token, $type = null): ?IdentityInterface
     {
-        return $this->hasMany(Order::class, ['user_id' => 'id']);
+        return self::findOne(['token' => $token]);
     }
 
-
-    /**
-     * column role ENUM value labels
-     * @return string[]
-     */
-    public static function optsRole()
+    public static function findByUsername(string $username):  ?self
     {
-        return [
-            self::ROLE_ADMIN => Yii::t('app', 'admin'),
-            self::ROLE_MANAGER => Yii::t('app', 'manager'),
-            self::ROLE_CUSTOMER => Yii::t('app', 'customer'),
-        ];
+        return self::findOne(['username' => $username]);
     }
 
-    /**
-     * @return string
-     */
-    public function displayRole()
-    {
-        return self::optsRole()[$this->role];
-    }
-
-    /**
-     * @return bool
-     */
-    public function isRoleAdmin()
-    {
-        return $this->role === self::ROLE_ADMIN;
-    }
-
-    public function setRoleToAdmin()
-    {
-        $this->role = self::ROLE_ADMIN;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isRoleManager()
-    {
-        return $this->role === self::ROLE_MANAGER;
-    }
-
-    public function setRoleToManager()
-    {
-        $this->role = self::ROLE_MANAGER;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isRoleCustomer()
-    {
-        return $this->role === self::ROLE_CUSTOMER;
-    }
-
-    public function setRoleToCustomer()
-    {
-        $this->role = self::ROLE_CUSTOMER;
-    }
-
-// //OLD LOGIC
-//    public $id;
-//    public $username;
-//    public $password;
-//    public $authKey;
-//    public $accessToken;
-
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
-
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function findIdentity($id)
-    {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function findIdentityByAccessToken($token, $type = null)
-    {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Finds user by username
-     *
-     * @param string $username
-     * @return static|null
-     */
-    public static function findByUsername($username)
-    {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getAuthKey()
+    public function getAuthKey(): ?string
     {
-        return $this->authKey;
+        return $this->token;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function validateAuthKey($authKey)
+    public function validateAuthKey($authKey): bool
     {
-        return $this->authKey === $authKey;
+        return $this->getAuthKey() === $authKey;
     }
 
-    /**
-     * Validates password
-     *
-     * @param string $password password to validate
-     * @return bool if password provided is valid for current user
-     */
-    public function validatePassword($password)
+    public function validatePassword(string $password): bool
     {
-        return $this->password === $password;
+        return Yii::$app->security->validatePassword($password, $this->password);
+    }
+
+    public static function createUser(string $username, string $password): self
+    {
+        $user = new self();
+        $user->username = $username;
+        $user->password = Yii::$app->security->generatePasswordHash($password);
+        $user->token = Yii::$app->security->generateRandomString();
+        $user->role = self::ROLE_CUSTOMER;
+        $user->save(false);
+
+        return $user;
     }
 }

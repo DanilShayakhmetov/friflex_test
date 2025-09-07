@@ -54,17 +54,17 @@ $config = [
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
-            'enableStrictParsing' => false, // можно включить true, если хочешь, чтобы работали только правила
+            'enableStrictParsing' => false,
             'rules' => [
-
+                'admin/product/<id:\d+>/edit' => 'admin/product/update',
                 [
                     'class' => 'yii\rest\UrlRule',
-                    'controller' => ['api/order'], // контроллер: controllers/api/OrderController
-                    'pluralize' => false,          // чтобы путь был /api/order (а не /api/orders)
+                    'controller' => ['api/order'],
+                    'pluralize' => false,
                 ],
                 [
                     'class' => 'yii\rest\UrlRule',
-                    'controller' => ['api/product'], // controllers/api/ProductController
+                    'controller' => ['api/product'],
                     'pluralize' => false,
                 ],
 
