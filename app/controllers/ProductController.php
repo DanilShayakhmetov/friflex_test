@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\components\services\DummyJsonSyncParser;
+use app\components\services\ParserInterface;
 use app\models\Product;
 use app\models\ProductSearch;
 use yii\web\Controller;
@@ -29,6 +31,20 @@ class ProductController extends Controller
                 ],
             ]
         );
+    }
+
+    private ParserInterface $parser;
+
+    public function __construct($id, $module, ParserInterface $parser, $config = [])
+    {
+        $this->parser = $parser;
+        parent::__construct($id, $module, $config);
+    }
+
+    public function actionSync()
+    {
+        $data = $this->parser->fetchData();
+        return $this->asJson(['count' => count($data), 'products' => $data]);
     }
 
     /**

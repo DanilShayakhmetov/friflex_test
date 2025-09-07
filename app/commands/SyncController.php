@@ -7,20 +7,26 @@
 
 namespace app\commands;
 
+use app\components\services\ParserInterface;
 use yii\console\Controller;
-use yii\helpers\Json;
 use app\models\Product;
 
 class SyncController extends Controller
 {
+    private ParserInterface $parser;
+
+    public function __construct($id, $module, ParserInterface $parser, $config = [])
+    {
+        $this->parser = $parser;
+        parent::__construct($id, $module, $config);
+    }
+
     public function actionProducts()
     {
-        $url = 'https://dummyjson.com/products';
-        $json = file_get_contents($url);
-        $data = Json::decode($json);
+        $data = $this->parser->fetchData();
 
-        if (!empty($data['products'])) {
-            foreach ($data['products'] as $item) {
+        if (!empty($data)) {
+            foreach ($data as $item) {
                 $product = Product::findOne(['id' => $item['id']]);
                 if (!$product) {
                     $product = new Product();
@@ -28,11 +34,15 @@ class SyncController extends Controller
                 }
                 $product->name = $item['title'];
                 $product->price = $item['price'];
+                $product->description = $item['description'];
                 $product->save(false);
             }
-        }
 
-        echo "Products synced!\n";
+            echo "Products synced!\n";
+        } else {
+
+            echo "Error - empty data!\n";
+        }
     }
 }
 

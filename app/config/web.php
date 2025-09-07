@@ -53,16 +53,48 @@ $config = [
         'db' => $db,
         'urlManager' => [
             'enablePrettyUrl' => true,
-            'enableStrictParsing' => true,
             'showScriptName' => false,
+            'enableStrictParsing' => false, // можно включить true, если хочешь, чтобы работали только правила
             'rules' => [
-                // REST API
-                ['class' => 'yii\rest\UrlRule', 'controller' => ['api/order']],
 
-                // Пример ЧПУ для фронта
-                'order/<id:\d+>/view' => 'order/view',
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['api/order'], // контроллер: controllers/api/OrderController
+                    'pluralize' => false,          // чтобы путь был /api/order (а не /api/orders)
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['api/product'], // controllers/api/ProductController
+                    'pluralize' => false,
+                ],
+
+                // CRUD для OrderController
+                'order/<id:\d+>/view'   => 'order/view',
                 'order/<id:\d+>/update' => 'order/update',
+                'order/create'          => 'order/create',
+                'order/index'           => 'order/index',
+                'order'                 => 'order/index',
+
+                // CRUD для ProductController
+                'product/<id:\d+>/view'   => 'product/view',
+                'product/<id:\d+>/update' => 'product/update',
+                'product/create'          => 'product/create',
+                'product/index'           => 'product/index',
+                'product/sync'            => 'product/sync',
+                'product'                 => 'product/index',
+
+                // CRUD для UserController
+                'user/<id:\d+>/view'   => 'user/view',
+                'user/<id:\d+>/update' => 'user/update',
+                'user/create'          => 'user/create',
+                'user/index'           => 'user/index',
+                'user'                 => 'user/index',
             ],
+        ],
+    ],
+    'container' => [
+        'singletons' => [
+            app\components\services\ParserInterface::class => app\components\services\DummyJsonSyncParser::class,
         ],
     ],
     'params' => $params,

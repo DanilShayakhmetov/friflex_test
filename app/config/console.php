@@ -1,5 +1,8 @@
 <?php
 
+use app\components\services\DummyJsonSyncParser;
+use app\components\services\ParserInterface;
+
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
@@ -37,6 +40,11 @@ $config = [
         'db' => $db,
     ],
     'params' => $params,
+    'container' => [
+        'definitions' => [
+            ParserInterface::class => DummyJsonSyncParser::class,
+        ],
+    ],
     /*
     'controllerMap' => [
         'fixture' => [ // Fixture generation command line.
