@@ -57,6 +57,7 @@ $config = [
             'enableStrictParsing' => false,
             'rules' => [
                 'admin/product/<id:\d+>/edit' => 'admin/product/update',
+                'admin/product/update' => '/product/update',
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => ['api/order'],
