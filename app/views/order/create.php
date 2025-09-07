@@ -40,9 +40,11 @@ $form = ActiveForm::begin();
 
 <?php
 
-$productsJson = json_encode(ArrayHelper::map($products, 'id', 'name'));
+$productsNames = json_encode(ArrayHelper::map($products, 'id', 'name'));
+$productsPrices = json_encode(ArrayHelper::map($products, 'id', 'price'));
 $js = <<<JS
-let products = $productsJson;
+let products = $productsNames;
+let prices = $productsPrices;
 let itemIndex = 0;
 
 function createOrderItem(index) {
@@ -50,11 +52,10 @@ function createOrderItem(index) {
     html += '<select name="OrderForm[items]['+index+'][product_id]" class="form-control mb-1">';
     html += '<option value="">Выберите товар</option>';
     for (const id in products) {
-        html += '<option value="'+id+'">'+products[id]+'</option>';
+        html += '<option value="'+id+'">'+products[id]+' - '+prices[id]+'</option>';
     }
     html += '</select>';
     html += '<input type="number" name="OrderForm[items]['+index+'][count]" value="1" min="1" class="form-control mb-1" placeholder="Количество" />';
-    html += '<input type="number" step="0.01" name="OrderForm[items]['+index+'][price]" class="form-control mb-1" placeholder="Цена" />';
     html += '<button type="button" class="btn btn-danger remove-item">Удалить</button>';
     html += '</div>';
     return html;

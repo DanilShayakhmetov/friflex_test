@@ -3,8 +3,6 @@
 namespace app\models;
 
 use yii\base\Model;
-use app\models\Order;
-use app\models\OrderItem;
 
 class OrderForm extends Model
 {
@@ -16,7 +14,7 @@ class OrderForm extends Model
     {
         return [
             [['name', 'status'], 'required'],
-            ['items', 'safe'], // массив продуктов
+            ['items', 'safe'],
         ];
     }
 
@@ -26,11 +24,7 @@ class OrderForm extends Model
         $order->name = $this->name;
         $order->status = $this->status ?: Order::STATUS_NEW;
         $order->date = date('Y-m-d H:i:s');
-
-        // Привязка к пользователю (например, текущий авторизованный)
         $order->user_id = \Yii::$app->user->id ?? null;
-
-        // Общая сумма
         $totalPrice = 0;
 
         if (!$order->save()) {
@@ -38,13 +32,15 @@ class OrderForm extends Model
             return false;
         }
 
-        // Сохранение позиций
         foreach ($this->items as $itemData) {
+            $id = $itemData['product_id'];
+            $product = Product::findOne($id);
             $item = new OrderItem();
+            $item->product_id = $id;
             $item->order_id = $order->id;
-            $item->product_id = $itemData['product_id'];
             $item->count = $itemData['count'];
-            $item->price = $itemData['price'];
+            $item->price = $product->price;
+            $item->description = $product->description;
             if ($item->save()) {
                 $totalPrice += $item->count * $item->price;
             } else {
@@ -52,7 +48,6 @@ class OrderForm extends Model
             }
         }
 
-        // Обновляем общую сумму заказа
         $order->total_price = $totalPrice;
         $order->save(false, ['total_price']);
 
