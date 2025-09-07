@@ -84,4 +84,19 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
 
         return $user;
     }
+
+    public function isRoleAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isRoleManager(): bool
+    {
+        return $this->role === self::ROLE_MANAGER;
+    }
+
+    public function isRoleCustomer(): bool
+    {
+        return $this->role === self::ROLE_CUSTOMER;
+    }
 }

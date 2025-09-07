@@ -2,6 +2,7 @@
 
 namespace app\components\services;
 
+use app\models\Product;
 use yii\httpclient\Client;
 
 class DummyJsonSyncParser implements ParserInterface
@@ -28,5 +29,21 @@ class DummyJsonSyncParser implements ParserInterface
         }
 
         return $response->data['products'] ?? [];
+    }
+
+    public function sync(array $data): int
+    {
+        $count = 0;
+        foreach ($data as $item) {
+            $product = Product::findOne(['id' => $item['id']]) ?: new Product(['id' => $item['id']]);
+            $product->name = $item['title'];
+            $product->price = $item['price'];
+            $product->description = $item['description'];
+            if ($product->save(false)) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 }
