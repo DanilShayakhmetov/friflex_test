@@ -77,6 +77,7 @@ $config = [
                 'order/<id:\d+>/update' => 'order/update',
                 'order/create'          => 'order/create',
                 'order/index'           => 'order/index',
+                'order/<id:\d+>/delete' => 'order/delete',
                 'order'                 => 'order/index',
 
                 // CRUD для ProductController
