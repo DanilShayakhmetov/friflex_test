@@ -14,7 +14,6 @@ class OrderController extends ActiveController
     {
         $behaviors = parent::behaviors();
 
-        // Включаем аутентификацию по токену (пример, можно JWT)
         $behaviors['authenticator'] = [
             'class' => HttpBearerAuth::class,
         ];
