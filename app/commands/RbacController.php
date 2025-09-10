@@ -69,10 +69,9 @@ class RbacController extends Controller
                 echo "Токен сгенерирован для пользователя {$user->username}: {$user->token}\n";
             }
 
-            // Назначаем роль по username (можно менять логику по своему усмотрению)
-            if (strpos(strtolower($user->username), 'admin') !== false) {
+            if (strpos(strtolower($user->role), 'admin') !== false) {
                 $role = $admin;
-            } elseif (strpos(strtolower($user->username), 'manager') !== false) {
+            } elseif (strpos(strtolower($user->role), 'manager') !== false) {
                 $role = $manager;
             } else {
                 $role = $customer;
