@@ -10,7 +10,6 @@ class DummyJsonSyncParserTest extends TestCase
 {
     public function testFetchDataReturnsProducts()
     {
-        // Мокаем Response как простой объект без Yii
         $mockResponse = (object)[
             'data' => [
                 'products' => [
@@ -25,7 +24,6 @@ class DummyJsonSyncParserTest extends TestCase
             'isOk' => true,
         ];
 
-        // Мокаем Client с методом get(), который возвращает объект с send()
         $mockClient = $this->getMockBuilder(Client::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['get'])
