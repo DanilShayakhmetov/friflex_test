@@ -41,6 +41,18 @@ class Product extends \yii\db\ActiveRecord
         ];
     }
 
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            $this->price = round($this->price, 2);
+            $this->name = trim($this->name);
+
+            return true;
+        }
+        return false;
+    }
+
+
     /**
      * {@inheritdoc}
      */
